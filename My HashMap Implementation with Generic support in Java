@@ -1,0 +1,152 @@
+//HashMap implementation using LinkedList with dynamic load factor/ It has Generic support. 
+
+package PQ;
+import java.util.*;
+
+public class CustomHashMap {
+	
+	public static class My_HashMap<K,V>{
+	
+		private LinkedList<HMNode>[] bucket;
+		int size;
+		double lambda;
+		public My_HashMap(int lambda) {
+			initbucket(4);
+			size =0;
+			this.lambda =lambda;
+				
+		}
+		
+		
+		private void initbucket(int N) {
+			bucket = new LinkedList[N];
+			for(int i=0;i<N;i++) {
+				bucket[i] = new LinkedList<>();
+			}
+		}
+		
+	
+		
+		
+		private class HMNode{
+			K key;
+			V value;
+			HMNode(K key,V value){
+				this.key = key;
+				this.value = value;
+			}
+			
+		}
+		
+		
+		public void My_put(K key, V value) {
+			int bi = hashfn(key);
+			int di = getIndexWithinBucket(key,bi);
+			if(di!=-1) {
+				HMNode node = bucket[bi].get(di);
+				node.value = value;
+			}else{
+				HMNode new_node = new HMNode(key,value);
+				bucket[bi].add(new_node);
+				size++;
+				
+			}
+			
+			double load_factor = size*1.0/bucket.length;
+			if(load_factor>lambda) {
+				rehash();
+			}
+		}
+		
+		private void rehash() {
+			
+			LinkedList<HMNode>[] old_bucket = bucket;
+			initbucket(2*size);
+			size =0;
+			for(int i=0;i<old_bucket.length;i++) {
+				for(int j=0;j<old_bucket[i].size();i++) {
+					My_put(old_bucket[i].get(j).key,old_bucket[i].get(j).value);
+				}
+			}
+			 
+		}
+		
+		
+		public boolean My_containsKey(K key) {
+			int bi = hashfn(key);
+			int di = getIndexWithinBucket(key,bi);
+			if(di==-1) return false;
+			return true;
+			
+		}
+		
+		private int hashfn(K key) {
+			int hc = key.hashCode();
+			int abshc = Math.abs(hc)%bucket.length;
+			return abshc;
+		}
+		
+		
+		
+		private int getIndexWithinBucket(K key,int bi) {
+			for(int i=0;i<bucket[bi].size();i++) {
+				if(bucket[bi].get(i).key.equals(key)) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		
+		
+		public V My_get(K key) {
+			int bi = hashfn(key);
+			int di = getIndexWithinBucket(key,bi);
+			if(di==-1) return null; 
+			return bucket[bi].get(di).value;
+			
+		}
+		
+		public V My_remove(K key) {
+			int bi = hashfn(key);
+			int di = getIndexWithinBucket(key,bi);
+			if(di==-1) return null; 
+			else {
+				size--;
+				HMNode temp = bucket[bi].remove(di);
+				return temp.value;
+				
+			}
+		}
+		
+		
+		public int size() {
+			return size;
+		}
+		
+		
+		public ArrayList<K> keySet(){
+			ArrayList<K> arr = new ArrayList<>();
+			for(int i=0;i<bucket.length;i++) {
+				for(int j=0;j<bucket[i].size();j++) {
+					arr.add(bucket[i].get(j).key);
+				}
+			}
+			
+			return arr;
+		}
+
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Scanner sc = new Scanner(System.in);
+		int load_factor = sc.nextInt();
+		My_HashMap<String,Integer> HashMap = new My_HashMap<>(load_factor);
+		HashMap.My_put("priyansh",234 );
+		System.out.println(HashMap.keySet());
+	
+	
+
+	}
+
+}
